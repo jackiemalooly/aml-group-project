@@ -23,26 +23,28 @@ set_seed(42)
 if not os.path.exists("./logs/"):
     os.mkdir("./logs/")
 log = Logger()
-# log.open("logs/%s_log_train.txt")
+log.open("logs/logfile.txt")
 
-# load the MNIST dataset
+# load the STL10 dataset
 image_transform = torchvision.transforms.Compose([
                                torchvision.transforms.ToTensor(),
                                torchvision.transforms.Normalize(
-                                 (0.1307,), (0.3081,))])
+                                 (0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-train_dataset = torchvision.datasets.MNIST('dataset/',
+# Once we have the transformations defined, lets define the train and test sets
+train_dataset = torchvision.datasets.STL10('dataset/',
                                            split='train',
                                            download=True,
                                            transform=image_transform)
-test_dataset = torchvision.datasets.MNIST('dataset/',
+test_dataset = torchvision.datasets.STL10('dataset/',
                                           split='test',
                                           download=True,
                                           transform=image_transform)
 
-# Define the batch size and initialize the data loaders
-batch_size_train = 256
-batch_size_test = 1024 
+batch_size_train = 256 # We use smaller batch size here for training
+batch_size_test = 1024 # We use bigger batch size for testing
+
+# Once we have the datasets defined, lets define the data loaders as follows
 train_loader = torch.utils.data.DataLoader(train_dataset,
                                            batch_size=batch_size_train,
                                            shuffle=True)
@@ -154,7 +156,7 @@ def train(model, device, train_loader, optimizer):
         optimizer.step()
         # update the loss meter
         loss.update(loss_this.item(), target.shape[0])
-    log('Train: Average loss: {:.4f}\n'.format(loss.avg))
+    log.write('Train: Average loss: {:.4f}\n'.format(loss.avg))
     return loss.avg
 
 ##define test function
@@ -190,7 +192,7 @@ def test(model, device, test_loader):
         # update the loss and accuracy meter
         acc.update(acc_this, target.shape[0])
         loss.update(loss_this.item(), target.shape[0])
-    log('Test: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+    log.write('Test: Average loss: {:.4f}\n'.format(
         loss.avg, correct, len(test_loader.dataset), acc.avg))
     
 ## define training loop
@@ -198,12 +200,12 @@ def main():
     # create TensorBoard logger
     writer = SummaryWriter('runs/mnist_experiment_1')
     # number of epochs we decide to train
-    num_epoch = 10
+    num_epoch = 5
     for epoch in range(1, num_epoch + 1):
         epoch_loss = train(model, device, train_loader, optimizer)
         writer.add_scalar('training_loss', epoch_loss, global_step=epoch)
     test(model, device, test_loader)
-    log({summary(model, (1, 28, 28))})
+    log.write(f'{summary(model, (3, 224, 224))}')
 
 if __name__ == "__main__":
     main()
