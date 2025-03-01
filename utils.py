@@ -11,8 +11,6 @@ from torch.autograd import Variable
 from tqdm.notebook import tqdm
 import math
 import random
-from args import argument_parser
-args = argument_parser()
 
 # evaluate meters
 class AverageMeter(object):
