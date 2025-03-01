@@ -25,24 +25,26 @@ if not os.path.exists("./logs/"):
 log = Logger()
 # log.open("logs/%s_log_train.txt")
 
-# load the MNIST dataset
+# load the STL10 dataset
 image_transform = torchvision.transforms.Compose([
                                torchvision.transforms.ToTensor(),
                                torchvision.transforms.Normalize(
-                                 (0.1307,), (0.3081,))])
+                                 (0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-train_dataset = torchvision.datasets.MNIST('dataset/',
-                                           train=True,
+# Once we have the transformations defined, lets define the train and test sets
+train_dataset = torchvision.datasets.STL10('dataset/',
+                                           split='train',
                                            download=True,
                                            transform=image_transform)
-test_dataset = torchvision.datasets.MNIST('dataset/',
-                                          train=False,
+test_dataset = torchvision.datasets.STL10('dataset/',
+                                          split='test',
                                           download=True,
                                           transform=image_transform)
 
-# Define the batch size and initialize the data loaders
-batch_size_train = 256
-batch_size_test = 1024 
+batch_size_train = 256 # We use smaller batch size here for training
+batch_size_test = 1024 # We use bigger batch size for testing
+
+# Once we have the datasets defined, lets define the data loaders as follows
 train_loader = torch.utils.data.DataLoader(train_dataset,
                                            batch_size=batch_size_train,
                                            shuffle=True)
