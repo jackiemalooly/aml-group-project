@@ -13,8 +13,6 @@ import os
 from utils import (
 AverageMeter, 
 Logger,
-test,
-train,
 set_seed,
 )
 
