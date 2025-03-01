@@ -192,7 +192,7 @@ def test(model, device, test_loader):
         # update the loss and accuracy meter
         acc.update(acc_this, target.shape[0])
         loss.update(loss_this.item(), target.shape[0])
-    log.write('Test: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+    log.write('Test: Average loss: {:.4f}\n'.format(
         loss.avg, correct, len(test_loader.dataset), acc.avg))
     
 ## define training loop
@@ -205,7 +205,7 @@ def main():
         epoch_loss = train(model, device, train_loader, optimizer)
         writer.add_scalar('training_loss', epoch_loss, global_step=epoch)
     test(model, device, test_loader)
-    log.write({summary(model, (3, 224, 224))})
+    log.write(f'{summary(model, (3, 224, 224))}')
 
 if __name__ == "__main__":
     main()
