@@ -23,7 +23,7 @@ set_seed(42)
 if not os.path.exists("./logs/"):
     os.mkdir("./logs/")
 log = Logger()
-# log.open("logs/%s_log_train.txt")
+log.open("logs/logfile.txt")
 
 # load the STL10 dataset
 image_transform = torchvision.transforms.Compose([
