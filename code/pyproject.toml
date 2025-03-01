@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "code"
+version = "0.1.0"
+description = "project code goes here."
+authors = ["frankcholula <lu.phrank@gmail.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.10, <4.0"
+scipy = "^1.14.1"
+matplotlib = "^3.10.0"
+ipykernel = "^6.29.5"
+numpy = "^2.2.1"
+streamlit = "^1.41.1"
+opencv-python = "^4.10.0.84"
+scikit-learn = "^1.6.0"
+pillow = "^11.0.0"
+pandas = "^2.2.3"
+
+
+[tool.poetry.group.dev.dependencies]
+notebook = "^7.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
