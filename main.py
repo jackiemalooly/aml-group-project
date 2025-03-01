@@ -32,11 +32,11 @@ image_transform = torchvision.transforms.Compose([
                                  (0.1307,), (0.3081,))])
 
 train_dataset = torchvision.datasets.MNIST('dataset/',
-                                           split='train',
+                                           train=True,
                                            download=True,
                                            transform=image_transform)
 test_dataset = torchvision.datasets.MNIST('dataset/',
-                                          split='test',
+                                          train=False,
                                           download=True,
                                           transform=image_transform)
 
