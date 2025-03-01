@@ -200,7 +200,7 @@ def main():
     # create TensorBoard logger
     writer = SummaryWriter('runs/mnist_experiment_1')
     # number of epochs we decide to train
-    num_epoch = 10
+    num_epoch = 5
     for epoch in range(1, num_epoch + 1):
         epoch_loss = train(model, device, train_loader, optimizer)
         writer.add_scalar('training_loss', epoch_loss, global_step=epoch)
