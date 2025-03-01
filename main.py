@@ -156,7 +156,7 @@ def train(model, device, train_loader, optimizer):
         optimizer.step()
         # update the loss meter
         loss.update(loss_this.item(), target.shape[0])
-    log.write('Train: Average loss: {:.4f}\n'.format(loss.avg))
+    log.write('Train: Average loss: {loss.avg}\n'.format(loss.avg))
     return loss.avg
 
 ##define test function
@@ -192,7 +192,7 @@ def test(model, device, test_loader):
         # update the loss and accuracy meter
         acc.update(acc_this, target.shape[0])
         loss.update(loss_this.item(), target.shape[0])
-    log.write('Test: Average loss: {:.4f}\n'.format(
+    log.write('Test: Average loss: {loss.avg}\n'.format(
         loss.avg, correct, len(test_loader.dataset), acc.avg))
     
 ## define training loop
