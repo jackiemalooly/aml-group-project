@@ -18,6 +18,10 @@ opencv-python = "^4.10.0.84"
 scikit-learn = "^1.6.0"
 pillow = "^11.0.0"
 pandas = "^2.2.3"
+torch = "^2.6.0"
+torchvision = "^0.21.0"
+torchsummary = "^1.5.1"
+tqdm = "^4.67.1"
 
 
 [tool.poetry.group.dev.dependencies]
