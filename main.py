@@ -205,7 +205,7 @@ def main():
         epoch_loss = train(model, device, train_loader, optimizer)
         writer.add_scalar('training_loss', epoch_loss, global_step=epoch)
     test(model, device, test_loader)
-    log.write({summary(model, (1, 28, 28))})
+    log.write({summary(model, (3, 224, 224))})
 
 if __name__ == "__main__":
     main()
