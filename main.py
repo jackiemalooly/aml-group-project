@@ -20,7 +20,7 @@ args = argument_parser().parse_args()
 if not os.path.exists("./logs/"):
     os.mkdir("./logs/")
 log = Logger()
-log.open("logs/logfile.txt")
+#log.open("logs/logfile.txt") # Not storing any logs for now. We'll likely just use comet_ml for logging.
 
 # Initialize comet_ml
 #COMET_ML_API_KEY = os.getenv("COMET_ML_API_KEY")
