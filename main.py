@@ -49,7 +49,7 @@ def test(model, dataset):
 def main():
     # Main function to handle training or testing
     if args.model_mode == "train":
-        train(model_name=args.model_name, dataset_path=args.dataset_location, epochs=args.epochs, imgsz=args.imgsz)
+        train(model=model, dataset_path=args.dataset_location, epochs=args.epochs, imgsz=args.imgsz)
     elif args.model_mode == "test":
         test(args.model_name, args.dataset_location)
     else:

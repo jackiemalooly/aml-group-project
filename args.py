@@ -7,3 +7,4 @@ def argument_parser():
     parser.add_argument('--epochs', type=int, default=10, help='Number of epochs')
     parser.add_argument('--imgsz', type=int, default=640, help='Image size')
     parser.add_argument('--dataset_location', type=str, required=True, help='Path to the dataset')
+    return parser

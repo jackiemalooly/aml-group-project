@@ -3,4 +3,4 @@ python main.py \
 --model_name yolo11n.pt \
 --epochs 5 \
 --imgsz 640 \
---dataset_location ../military_dataset_yolo_version \
+--dataset_location datasets \
