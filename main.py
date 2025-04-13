@@ -67,7 +67,7 @@ def train(model=str, dataset_path=None, epochs=10, imgsz=640):
       raise FileNotFoundError(f"No YAML files found in {dataset_path}")
     data_yaml_file_path = data_yaml_files[0]
     print(f"For training data, using YAML file: {data_yaml_file_path}")
-    hyp_yaml_file_path = yaml_path = create_hyperparameter_yaml(hyp_params)
+    hyp_yaml_file_path = create_hyperparameter_yaml(args=args, include_only=hyp_params)
     print(f'For hyperparameters, using YAML file: {hyp_yaml_file_path}')
     results = model.train(
       data=data_yaml_file_path, # Path to dataset config file
