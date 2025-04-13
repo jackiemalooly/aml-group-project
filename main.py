@@ -28,15 +28,20 @@ log = Logger()
 #    raise ValueError("COMET_ML_API_KEY is not set.")
 #comet_ml.init(project_name="your-project-name", api_key="COMET_ML_API_KEY")
 
-model = YOLO(args.model_name)
+model = YOLO(args.model_name, 'detect')
 
 def train(model=str, dataset_path=None, epochs=10, imgsz=640):
-    yaml_files = glob.glob(os.path.join(dataset_path, '*.yaml'))
-    if not yaml_files:
+    data_yaml_files = glob.glob(os.path.join(dataset_path, '*.yaml'))
+    if not data_yaml_files:
       raise FileNotFoundError(f"No YAML files found in {dataset_path}")
-    yaml_file_path = yaml_files[0]
+    yaml_file_path = data_yaml_files[0]
     print(f"Using YAML file: {yaml_file_path}")
-    results = model.train(data=yaml_file_path, epochs=epochs, imgsz=imgsz)
+    ##helper function to build and load --hyp yaml
+    results = model.train(
+      data=yaml_file_path, # Path to dataset config file
+      epochs=epochs, # Number of training epochs
+      imgsz=imgsz), #Image size for training
+      # Also takes a device argument if needed, e.g. device="cpu"
     log.write(f"Results: {results}")
     return results
 
