@@ -1,5 +1,6 @@
 import os
 import sys 
+import yaml
 import json
 import torch
 import shutil
@@ -70,3 +71,37 @@ def set_seed(seed_value):
         torch.cuda.manual_seed(seed_value)
         torch.cuda.manual_seed_all(seed_value)  # if you are using multi-GPU.
     print(f"Random seed set to: {seed_value}")
+
+def create_hyperparameter_yaml(args, include_only=None):
+    """
+    Create a YAML file with hyperparameters based on provided arguments.
+    
+    Args:
+        args: An argument namespace or dictionary containing experiment_name and other hyperparameters
+        include_only: List of argument names to include in the YAML file (None means include all)
+        
+    Returns:
+        str: Path to the created YAML file
+    """
+    if not isinstance(args, dict):
+        args_dict = vars(args)
+    else:
+        args_dict = args
+    
+    experiment_name = args_dict.get('experiment_name', 'default')
+    
+    hyperparameters = {}
+    for key, value in args_dict.items():
+        # Include only --hyp keys if requested
+        if include_only is not None:
+            if key in include_only:
+                hyperparameters[key] = value
+        elif key != 'experiment_name' and not key.startswith('_'):
+            hyperparameters[key] = value
+    
+    # Write the yaml file
+    yaml_path = f"hyp.{experiment_name}.yaml"
+    with open(yaml_path, 'w') as file:
+        yaml.dump(hyperparameters, file, sort_keys=False)
+
+    return yaml_path

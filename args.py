@@ -6,15 +6,15 @@ def argument_parser():
     parser.add_argument('--model_name', type=str, default='yolo11n.pt', help='Name of the model')
     parser.add_argument('--model_task', type=str, default='detect', help='YOLO task specification, i.e. detect, segment, classify, pose, obb.')
     parser.add_argument('--imgsz', type=int, default=640, help='Image size')
-    parser.add_argument('--dataset_location', type=str, required=True, help='Path to the dataset')
+    parser.add_argument('--dataset_location', type=str, help='Path to the dataset')
+    parser.add_argument('--experiment_name', type=str, default='aml-group-project', help='Name for the hyperparameters yaml file.')
     # hyperparameters, defaults set to baseline values
     parser.add_argument('--epochs', type=int, default=60, help='Number of epochs')
     parser.add_argument('--batch_size', type=int, default=100, help='Batch size')
-    ##TODO: Add these arguments to main.py and ssh file.
     parser.add_argument('--seed', type=int, default=42, help='Sets the random seed for training, ensuring reproducibility.')
     parser.add_argument('--optimizer', type=str, default='auto', help='Choice of optimizer for training. SGD, Adam, AdamW, NAdam, RAdam, RMSProp available.')
     parser.add_argument('--close_mosaic', type=int, default=10, help='Disables mosaic data augmentation in the last N epochs to stabilize training before completion. Setting to 0 disables this feature.')
-    parser.add_argument('--freeze', type=int|list, default=None, help='Can also accept a list. Freezes the first N layers of the model or specified layers by index, reducing the number of trainable parameters.')
+    parser.add_argument('--freeze', type=int, default=None, help='Can also accept a list. Freezes the first N layers of the model or specified layers by index, reducing the number of trainable parameters.')
     # --hyp yaml file args
     parser.add_argument('--lr0', type=float, default=0.0002, help='Initial speed for learning rate (SGD=1E-2, Adam=1E-3)')
     parser.add_argument('--lrf', type=float, default=0.001, help='Learning rate used in the final stages of training. Final OneCycleLR learning rate (lr0 * lrf)')
@@ -43,6 +43,5 @@ def argument_parser():
     parser.add_argument('--fliplr', type=float, default=0.0, help='image flip left-right (probability)')
     parser.add_argument('--mosaic', type=float, default=0.0, help='image mosaic (probability)')
     parser.add_argument('--mixup', type=float, default=0.0, help='image mixup (probability)')
-    parser.add_argument('--copy_paste', type=float, default=0.0, help='segment copy-paste (probability)')
     parser.add_argument('--copy_paste', type=float, default=0.0, help='segment copy-paste (probability)')
     return parser
