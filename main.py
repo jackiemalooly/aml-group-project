@@ -31,20 +31,20 @@ log = Logger()
 
 model = YOLO(args.model_name, 'detect')
 
-def train2(model=str, dataset_path=None, epochs=10, imgsz=640):
-    data_yaml_files = glob.glob(os.path.join(dataset_path, '*.yaml'))
-    if not data_yaml_files:
-      raise FileNotFoundError(f"No YAML files found in {dataset_path}")
-    yaml_file_path = data_yaml_files[0]
-    print(f"Using YAML file: {yaml_file_path}")
-    ##helper function to build and load --hyp yaml
-    results = model.train(
-      data=yaml_file_path, # Path to dataset config file
-      epochs=epochs, # Number of training epochs
-      imgsz=imgsz), #Image size for training
-      # Also takes a device argument if needed, e.g. device="cpu"
-    log.write(f"Results: {results}")
-    return results
+  # def train2(model=str, dataset_path=None, epochs=10, imgsz=640):
+  #    data_yaml_files = glob.glob(os.path.join(dataset_path, '*.yaml'))
+  #    if not data_yaml_files:
+  #      raise FileNotFoundError(f"No YAML files found in {dataset_path}")
+  #    yaml_file_path = data_yaml_files[0]
+  #    print(f"Using YAML file: {yaml_file_path}")
+#     ##helper function to build and load --hyp yaml
+#     results = model.train(
+#       data=yaml_file_path, # Path to dataset config file
+#       epochs=epochs, # Number of training epochs
+#       imgsz=imgsz), #Image size for training
+#       # Also takes a device argument if needed, e.g. device="cpu"
+#     log.write(f"Results: {results}")
+#     return results
 def train(model=str, dataset_path=None, epochs=10, imgsz=640, hyp=None):
     data_yaml_files = glob.glob(os.path.join(dataset_path, '*.yaml'))
     if not data_yaml_files:
@@ -59,28 +59,75 @@ def train(model=str, dataset_path=None, epochs=10, imgsz=640, hyp=None):
 
         'epochs': epochs,  # Number of training epochs
 
-        'imgsz': imgsz,  # Image size for training
-        
+        'imgsz': imgsz,  # Image size for training        
 
     }    
 
     # Add hyp file if provided
     if hyp:
-        cz= yaml_load(hyp)
+        custom_hyp= yaml_load(hyp)
 
         print(f"Using hyperparameter file: {hyp}")
-        train_args.update(cz)
+        train_args.update(custom_hyp)
 
     # Train the model with all arguments
     results = model.train(**train_args)
     log.write(f"Results: {results}")
     return results
 
-## TODO: refine test function
-def test(model, dataset):
-    results = model.test(data=dataset)
+def val(model=str, dataset_path=None, epochs=10, imgsz=640,batch=16,conf=0.25,iou=0.6):
+    data_yaml_files = glob.glob(os.path.join(dataset_path, '*.yaml'))
+      if not data_yaml_files:
+        raise FileNotFoundError(f"No YAML files found in {dataset_path}")
+      yaml_file_path = data_yaml_files[0]
+      print(f"Using YAML file: {yaml_file_path}")
+    ##helper function to build and load --hyp yaml
+     metrics = model.val(
+       data=yaml_file_path, # Path to dataset config file
+       epochs=epochs, # Number of training epochs
+       imgsz=imgsz,
+       batch=batch,
+       conf=conf,#Sets the minimum confidence threshold for detections. Lower values increase recall but may introduce more false positives. Used during validation to compute precision-recall curves.
+       iou=batch)#Sets the Intersection Over Union threshold for Non-Maximum Suppression. Controls duplicate detection elimination. 
+#       # Also takes a device argument if needed, e.g. device="cpu"
     log.write(f"Results: {results}")
-    return results 
+     return metrics
+    
+## TODO: refine test function
+def val(model=str, dataset_path=None, epochs=10, imgsz=640,batch=16,conf=0.25,iou=0.6):
+    data_yaml_files = glob.glob(os.path.join(dataset_path, '*.yaml'))
+      if not data_yaml_files:
+        raise FileNotFoundError(f"No YAML files found in {dataset_path}")
+      yaml_file_path = data_yaml_files[0]
+      print(f"Using YAML file: {yaml_file_path}")
+    ##helper function to build and load --hyp yaml
+     metrics = model.val(
+       data=yaml_file_path, # Path to dataset config file
+       epochs=epochs, # Number of training epochs
+       imgsz=imgsz,
+       batch=batch,
+       conf=conf,#Sets the minimum confidence threshold for detections. Lower values increase recall but may introduce more false positives. Used during validation to compute precision-recall curves.
+       iou=batch)#Sets the Intersection Over Union threshold for Non-Maximum Suppression. Controls duplicate detection elimination. 
+#       # Also takes a device argument if needed, e.g. device="cpu"
+    log.write(f"Results: {metrics}")
+     return metrics 
+
+def predict(model=str, dataset_path=None,imgsz=320,conf=0.5,save=True):
+    data_yaml_files = glob.glob(os.path.join(dataset_path, '*.yaml'))
+      if not data_yaml_files:
+        raise FileNotFoundError(f"No YAML files found in {dataset_path}")
+      yaml_file_path = data_yaml_files[0]
+      print(f"Using YAML file: {yaml_file_path}")
+    ##helper function to build and load --hyp yaml
+     predict = model.predict(
+       data=yaml_file_path, # Path to dataset config file
+        # Number of training epochs
+       imgsz=imgsz,
+       conf=conf,
+     save=save)
+     # Also takes a device argument if needed, e.g. device="cpu"
+    log.write(f"Results: {predict}")
+     return predict 
 
 def main():
     # Main function to handle training or testing
