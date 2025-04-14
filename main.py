@@ -46,6 +46,28 @@ def test(model, dataset):
     log.write(f"Results: {results}")
     return results 
 
+image_file_extensions = ['.jpeg', '.png', '.jpg']
+def test_yolo_model(test_img_folder_path, model_name='yolov8n.pt'):
+  for file_name in os.listdir(test_img_folder_path):
+    ext = os.path.splitext(file_name)[1].lower()
+    if ext in image_file_extensions:
+      current_img_path = test_img_folder_path + "/" + file_name
+      print(current_img_path)
+      test_yolo_inference_single_image(image_path=current_img_path, model_name=model_name)
+    else:
+      print("file is not an image")  
+
+def test_yolo_inference_single_image(image_path, model_name='yolov8n.pt'):
+    model = YOLO(model_name)  
+    results = model(image_path)
+    annotated_frame = results[0].plot() 
+    plt.imshow(cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB))
+    plt.title(model_name)
+    plt.axis('off')
+    plt.show()
+
+    
+
 def main():
     # Main function to handle training or testing
     if args.model_mode == "train":
