@@ -8,12 +8,20 @@ def argument_parser():
     parser.add_argument('--model_task', type=str, default='detect', help='YOLO task specification, i.e. detect, segment, classify, pose, obb.')
     parser.add_argument('--imgsz', type=int, default=640, help='Image size')
     parser.add_argument('--dataset_location', type=str, required=True, help='Path to the dataset')
+<<<<<<< Updated upstream
     parser.add_argument('--hyp', type=str, required=True,default = None , help='Path to the hyperpameters')
     parser.add_argument('--iou', type=float,default = 0.6 , help='Iou of validation')
     parser.add_argument('--conf', type=float,default = 0.25 , help='confidence threshold')
     parser.add_argument('--save', type=str,default = True , help='save images')
     
     
+=======
+    parser.add_argument('--hyp', type=str, required=False,default = None , help='Path to the hyperpameters')
+   # parser.add_argument('--iou', type=float,default = 0.6 , help='Iou of validation')
+   # parser.add_argument('--conf', type=float,default = 0.25 , help='confidence threshold')
+   # parser.add_argument('--save', type=str,required=False,default = True , help='save images')
+   # parser.add_argument('--batch', type=int,required=False, default=16, help='Number of batch')
+>>>>>>> Stashed changes
     return parser
     # # hyperparameters, defaults set to baseline values
      # parser.add_argument('--epochs', type=int, default=60, help='Number of epochs')
