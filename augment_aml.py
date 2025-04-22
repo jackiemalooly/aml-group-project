@@ -18,13 +18,13 @@ from tqdm import tqdm
 from collections import defaultdict
 
 # ==================== Configuration ====================
-DATA_YAML = '/Users/rishisengupta/Documents/git_AML/aml-group-project/AML-Project-1/data.yaml'  # <-- CHANGE THIS
-OUTPUT_DIR = '/Users/rishisengupta/Documents/git_AML/aml-group-project/AML-Project-1/augmented_dataset'
+DATA_YAML = '/user/HS402/rs02294/AML/aml-group-project/datasets/data.yaml'  # <-- CHANGE THIS
+OUTPUT_DIR = 'datasets/augmented_dataset'
 VISUALIZE_COUNT = 1
 
 # Create output folders
-os.makedirs(os.path.join(OUTPUT_DIR, 'images/train'), exist_ok=True)
-os.makedirs(os.path.join(OUTPUT_DIR, 'labels/train'), exist_ok=True)
+os.makedirs(os.path.join(OUTPUT_DIR, 'train/images'), exist_ok=True)
+os.makedirs(os.path.join(OUTPUT_DIR, 'train/labels'), exist_ok=True)
 
 # ==================== Utils ====================
 # def yolo_to_voc(box, w, h):
@@ -124,8 +124,8 @@ for img_file in tqdm(img_files):
     lbl_path = os.path.join(train_lbl_dir, img_file.replace('.jpg', '.txt').replace('.png', '.txt'))
     if not os.path.exists(lbl_path): continue
 
-    new_img_path = os.path.join(OUTPUT_DIR, 'images/train', img_file)
-    new_lbl_path = os.path.join(OUTPUT_DIR, 'labels/train', os.path.basename(lbl_path))
+    new_img_path = os.path.join(OUTPUT_DIR, 'train/images', img_file)
+    new_lbl_path = os.path.join(OUTPUT_DIR, 'train/labels', os.path.basename(lbl_path))
     shutil.copy2(img_path, new_img_path)
     shutil.copy2(lbl_path, new_lbl_path)
 
@@ -139,14 +139,12 @@ for img_file in tqdm(img_files):
     for line in lines:
         cls, *box = map(float, line.strip().split())
         class_counts[int(cls)] += 1
-        voc_box = yolo_to_voc(box, w, h)
-        boxes.append(voc_box)
+        boxes.append(box)
         labels.append(int(cls))
     data.append((img_file, img_path, boxes, labels, (w, h)))
 
 print("\nBefore Augmentation:")
-summarize_distribution(os.path.join(OUTPUT_DIR, 'labels/train'), class_names)
-
+summarize_distribution(os.path.join(OUTPUT_DIR, 'train/labels'), class_names)
 max_count = max(class_counts.values())
 max_class = max(class_counts, key=class_counts.get)
 print(f"\n🔢 Max class count is: {max_count} (Class ID: {max_class} - {class_names[max_class]})")
@@ -182,15 +180,14 @@ for cls_id in range(len(class_names)):
 
         # Save
         aug_name = f"aug_{cls_id}_{i}_{fname}"
-        cv2.imwrite(os.path.join(OUTPUT_DIR, 'images/train', aug_name), aug_img)
+        cv2.imwrite(os.path.join(OUTPUT_DIR, 'train/images', aug_name), aug_img)
 
-        with open(os.path.join(OUTPUT_DIR, 'labels/train', aug_name.replace('.jpg', '.txt').replace('.png', '.txt')), 'w') as f:
+        with open(os.path.join(OUTPUT_DIR, 'train/labels', aug_name.replace('.jpg', '.txt').replace('.png', '.txt')), 'w') as f:
             for box, label in zip(aug_boxes, aug_labels):
-                yolo_box = voc_to_yolo(box, w, h)
-                line = f"{label} " + " ".join([f"{v:.6f}" for v in yolo_box])
+                line = f"{label} " + " ".join([f"{v:.6f}" for v in box])
                 f.write(line + '\n')
         class_counts[cls_id] += 1
 
 print("\nAfter Augmentation:")
-summarize_distribution(os.path.join(OUTPUT_DIR, 'labels/train'), class_names)
+summarize_distribution(os.path.join(OUTPUT_DIR, 'train/labels'), class_names)
 print(f"\n✅ Balanced training set saved to: {OUTPUT_DIR}")
