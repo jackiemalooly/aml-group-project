@@ -145,7 +145,8 @@ for img_file in tqdm(img_files):
 
 print("\nBefore Augmentation:")
 summarize_distribution(os.path.join(OUTPUT_DIR, 'train/labels'), class_names)
-max_count = max(class_counts.values())
+#max_count = max(class_counts.values())
+max_count = 100
 max_class = max(class_counts, key=class_counts.get)
 print(f"\n🔢 Max class count is: {max_count} (Class ID: {max_class} - {class_names[max_class]})")
 transform = get_augmentation_pipeline()
