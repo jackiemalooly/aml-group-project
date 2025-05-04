@@ -26,14 +26,14 @@ class VarifocalLoss(nn.Module):
 
     @staticmethod
     def forward(pred_score, gt_score, label, alpha=0.75, gamma=2.0):
-        print ( "#########Computes varfocal loss for AML Project ##########")
+        print ( "#########Computes VarifocalLoss loss for AML Project ##########")
         print("GT_Score x label:",((gt_score * label)>0).sum())
         print("alpha:",alpha)
         print("gamma:",gamma)
     
 
         weight = alpha * pred_score.sigmoid().pow(gamma) * (1 - label) + gt_score * label
-        print("weight:",weight)
+        #print("weight:",weight)
 
         with autocast(enabled=False):
             loss = (
@@ -240,7 +240,7 @@ class v8DetectionLoss:
         # dfl_conf = pred_distri.view(batch_size, -1, 4, self.reg_max).detach().softmax(-1)
         # dfl_conf = (dfl_conf.amax(-1).mean(-1) + dfl_conf.amax(-1).amin(-1)) / 2
 
-        _, target_bboxes, target_scores, fg_mask, _ = self.assigner(
+        target_labels, target_bboxes, target_scores, fg_mask, _ = self.assigner(
             # pred_scores.detach().sigmoid() * 0.8 + dfl_conf.unsqueeze(-1) * 0.2,
             pred_scores.detach().sigmoid(),
             (pred_bboxes.detach() * stride_tensor).type(gt_bboxes.dtype),
@@ -253,9 +253,17 @@ class v8DetectionLoss:
         target_scores_sum = max(target_scores.sum(), 1)
         
         # Define target_labels for loss calculation
-        target_labels = target_scores.clone()
-        print("target_labels before:",target_labels.sum())
-        target_labels[target_labels > 0] = 1.0  # Convert to binary labels
+        #target_labels = target_scores.clone()
+        #print("target_labels before:",target_labels.sum())
+        #target_labels[target_labels > 0] = 1.0  # Convert to binary labels
+
+        target_labels = target_labels.unsqueeze(-1).expand(-1, -1, self.nc)  # [16, 8400] -> [16, 8400, 81]
+
+      
+
+       
+
+       
 
         #target_labels = torch.zeros_like(pred_scores)  # [batch_size, num_anchors, num_classes]
         #target_labels.scatter_(2, gt_labels.long(), 1.0)  # Set 1.0 at the positions specified by gt_labels
@@ -269,25 +277,27 @@ class v8DetectionLoss:
 
 
 
-        print("pred_scores shape:", pred_scores.shape)
-        print("target_labels shape:", target_labels.shape)
-        print("target_labels:",target_labels.sum())
-        print("target_labels non-zero count:", (target_labels > 0).sum())
-        #print("target_labels sample:", target_labels[0, :5, :5])
-        # Debugging intermediate values
-        print("target_scores sum true:", target_scores.sum())
-        print("target_scores_sum:", target_scores_sum)
-        print("gt_labels shape:", gt_labels.shape)
-        #print("gt_labels:", gt_labels)
-        print("gt_labels unique values:", torch.unique(gt_labels))
-        #print("target_labels:", target_labels)
-        #print("mask_gt:", mask_gt)
-        print("mask_gt.sum():", mask_gt.sum())
-        #print("gt_bboxes:", gt_bboxes)
-        #print("target_bboxes:", target_bboxes)
-        #print("target_scores:", target_scores)
-        print("fg_mask:", fg_mask.sum())
-        print("target_scores_sum:", target_scores_sum)
+        # print("pred_scores shape:", pred_scores.shape)
+        # print("target_labels shape:", target_labels.shape)
+        # print("target_labels:",target_labels.sum())
+        # print("target_labels non-zero count:", (target_labels > 0).sum())
+        # #print("target_labels sample:", target_labels[0, :5, :5])
+        # # Debugging intermediate values
+        # print("target_scores sum true:", target_scores.sum())
+        # print("target_scores_sum:", target_scores_sum)
+        # print("gt_labels shape:", gt_labels.shape)
+        # #print("gt_labels:", gt_labels)
+        # print("gt_labels unique values:", torch.unique(gt_labels))
+        # #print("target_labels:", target_labels)
+        # #print("mask_gt:", mask_gt)
+        # print("mask_gt.sum():", mask_gt.sum())
+        # #print("gt_bboxes:", gt_bboxes)
+        # #print("target_bboxes:", target_bboxes)
+        # #print("target_scores:", target_scores)
+        # #print("mask_gt:", mask_gt)
+        # print("fg_mask:", fg_mask)
+        # print("target_scores_sum:", target_scores_sum)
+   
 
 
 
@@ -296,12 +306,12 @@ class v8DetectionLoss:
         #loss[1] = self.bce(pred_scores, target_scores.to(dtype)).sum() / target_scores_sum  # BCE
         
         # Debug prints for initial loss
-        print("\nInitial Loss Debug:")
-        print("pred_scores mean/std:", pred_scores.mean(), pred_scores.std())
-        print("target_scores mean/std:", target_scores.mean(), target_scores.std())
-        print("target_labels mean/std:", target_labels.mean(), target_labels.std())
+        # print("\nInitial Loss Debug:")
+        # print("pred_scores mean/std:", pred_scores.mean(), pred_scores.std())
+        # print("target_scores mean/std:", target_scores.mean(), target_scores.std())
+        # print("target_labels mean/std:", target_labels.mean(), target_labels.std())
         
-        # Calculate raw loss components
+        # # Calculate raw loss components
         raw_loss = self.varifocal_loss(pred_scores, target_scores, target_labels)
         print("Raw varifocal loss:", raw_loss)
         print("Normalized loss:", raw_loss / target_scores_sum)
@@ -319,7 +329,8 @@ class v8DetectionLoss:
         loss[1] *= self.hyp.cls  # cls gain
         loss[2] *= self.hyp.dfl  # dfl gain
 
-
+        print("Total Loss:", loss.sum())
+        print("Total Loss * batch_size:", loss.sum() * batch_size)
         return loss.sum() * batch_size, loss.detach()  # loss(box, cls, dfl)
 
 
