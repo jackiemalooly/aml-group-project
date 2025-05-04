@@ -27,8 +27,14 @@ class VarifocalLoss(nn.Module):
     @staticmethod
     def forward(pred_score, gt_score, label, alpha=0.75, gamma=2.0):
         print ( "#########Computes varfocal loss for AML Project ##########")
+        print("GT_Score x label:",((gt_score * label)>0).sum())
+        print("alpha:",alpha)
+        print("gamma:",gamma)
+    
 
         weight = alpha * pred_score.sigmoid().pow(gamma) * (1 - label) + gt_score * label
+        print("weight:",weight)
+
         with autocast(enabled=False):
             loss = (
                 (F.binary_cross_entropy_with_logits(pred_score.float(), gt_score.float(), reduction="none") * weight)
@@ -245,15 +251,62 @@ class v8DetectionLoss:
         )
 
         target_scores_sum = max(target_scores.sum(), 1)
-
+        
         # Define target_labels for loss calculation
         target_labels = target_scores.clone()
+        print("target_labels before:",target_labels.sum())
         target_labels[target_labels > 0] = 1.0  # Convert to binary labels
+
+        #target_labels = torch.zeros_like(pred_scores)  # [batch_size, num_anchors, num_classes]
+        #target_labels.scatter_(2, gt_labels.long(), 1.0)  # Set 1.0 at the positions specified by gt_labels
+        #target_labels = torch.zeros(pred_scores.shape[0], pred_scores.shape[1], self.nc, device=pred_scores.device)
+        #target_labels.scatter_(2, gt_labels.long(), 1.0)  # Set 1.0 at the positions specified by gt_labels
+        # Create one-hot encoded target labels using F.one_hot
+        #target_labels = F.one_hot(gt_labels.squeeze(-1).long(), num_classes=self.nc).float()
+
+# Cls loss
+#loss[1] = self.varifocal_loss(pred_scores, target_scores, target_labels) / target_scores_sum  # VFL way
+
+
+
+        print("pred_scores shape:", pred_scores.shape)
+        print("target_labels shape:", target_labels.shape)
+        print("target_labels:",target_labels.sum())
+        print("target_labels non-zero count:", (target_labels > 0).sum())
+        #print("target_labels sample:", target_labels[0, :5, :5])
+        # Debugging intermediate values
+        print("target_scores sum true:", target_scores.sum())
+        print("target_scores_sum:", target_scores_sum)
+        print("gt_labels shape:", gt_labels.shape)
+        #print("gt_labels:", gt_labels)
+        print("gt_labels unique values:", torch.unique(gt_labels))
+        #print("target_labels:", target_labels)
+        #print("mask_gt:", mask_gt)
+        print("mask_gt.sum():", mask_gt.sum())
+        #print("gt_bboxes:", gt_bboxes)
+        #print("target_bboxes:", target_bboxes)
+        #print("target_scores:", target_scores)
+        print("fg_mask:", fg_mask.sum())
+        print("target_scores_sum:", target_scores_sum)
+
 
 
         # Cls loss
         loss[1] = self.varifocal_loss(pred_scores, target_scores, target_labels) / target_scores_sum  # VFL way
-        # loss[1] = self.bce(pred_scores, target_scores.to(dtype)).sum() / target_scores_sum  # BCE
+        #loss[1] = self.bce(pred_scores, target_scores.to(dtype)).sum() / target_scores_sum  # BCE
+        
+        # Debug prints for initial loss
+        print("\nInitial Loss Debug:")
+        print("pred_scores mean/std:", pred_scores.mean(), pred_scores.std())
+        print("target_scores mean/std:", target_scores.mean(), target_scores.std())
+        print("target_labels mean/std:", target_labels.mean(), target_labels.std())
+        
+        # Calculate raw loss components
+        raw_loss = self.varifocal_loss(pred_scores, target_scores, target_labels)
+        print("Raw varifocal loss:", raw_loss)
+        print("Normalized loss:", raw_loss / target_scores_sum)
+        print("Final cls loss:", loss[1])
+        print("Loss after cls weight:", loss[1] * self.hyp.cls)
 
         # Bbox loss
         if fg_mask.sum():
