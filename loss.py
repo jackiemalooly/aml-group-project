@@ -1,3 +1,18 @@
+# Define target_labels for loss calculation
+        #target_labels = target_scores.clone()
+        #print("target_labels before:",target_labels.sum())
+        #target_labels[target_labels > 0] = 1.0  # Convert to binary labels
+
+        #target_labels = target_labels.unsqueeze(-1).expand(-1, -1, self.nc)  # [16, 8400] -> [16, 8400, 81]
+        target_labels_onehot = torch.zeros(
+            (target_labels.shape[0], target_labels.shape[1], self.nc),
+            dtype=torch.int64,
+            device=target_labels.device,
+        )  # (b, h*w, num_classes)
+        target_labels_onehot.scatter_(2, target_labels.unsqueeze(-1), 1)
+        
+        # Expand target_labels to match class dimension
+        target_labels = target_labels.unsqueeze(-1).expand(-1, -1, self.nc)
 # Ultralytics YOLO 🚀, AGPL-3.0 license
 
 import torch
