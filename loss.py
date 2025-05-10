@@ -25,7 +25,7 @@ class VarifocalLoss(nn.Module):
         super().__init__()
 
     @staticmethod
-    def forward(pred_score, gt_score, label, alpha=1.0, gamma=1.0):
+    def forward(pred_score, gt_score, label, alpha=0.95, gamma=1.0):
         #print ( "#########Computes VarifocalLoss loss for AML Project ##########")
         #print("GT_Score x label:",((gt_score * label)>0).sum())
 
@@ -36,7 +36,6 @@ class VarifocalLoss(nn.Module):
         with autocast(enabled=False):
             loss = (
                 (F.binary_cross_entropy_with_logits(pred_score.float(), gt_score.float(), reduction="none") * weight)
-                .mean(1)
                 .sum()
             )
 
@@ -296,8 +295,8 @@ class v8DetectionLoss:
         # print("target_scores mean/std:", target_scores.mean(), target_scores.std())
         # print("target_labels mean/std:", target_labels.mean(), target_labels.std())
         
-        #loss[1] = self.varifocal_loss(pred_scores, target_scores, target_labels_onehot) if num_gts > 0 else 0
-        loss[1] = self.focal_loss(pred_scores, target_labels_onehot.float())
+        loss[1] = self.varifocal_loss(pred_scores, target_scores, target_labels_onehot)
+        #loss[1] = self.focal_loss(pred_scores, target_labels_onehot.float())
         loss[1] /= target_scores_sum  # Normalize by number of ground truth objects
         
         # Bbox loss
