@@ -313,88 +313,88 @@ class v8DetectionLoss:
         return loss.sum() * batch_size, loss.detach()  # loss(box, cls, dfl)
 
 
-    def __call__old(self, preds, batch):
-        """Calculate the sum of the loss for box, cls and dfl multiplied by batch size."""
-        loss = torch.zeros(3, device=self.device)  # box, cls, dfl
-        feats = preds[1] if isinstance(preds, tuple) else preds
-        pred_distri, pred_scores = torch.cat([xi.view(feats[0].shape[0], self.no, -1) for xi in feats], 2).split(
-            (self.reg_max * 4, self.nc), 1
-        )
+#     def __call__old(self, preds, batch):
+#         """Calculate the sum of the loss for box, cls and dfl multiplied by batch size."""
+#         loss = torch.zeros(3, device=self.device)  # box, cls, dfl
+#         feats = preds[1] if isinstance(preds, tuple) else preds
+#         pred_distri, pred_scores = torch.cat([xi.view(feats[0].shape[0], self.no, -1) for xi in feats], 2).split(
+#             (self.reg_max * 4, self.nc), 1
+#         )
 
-        pred_scores = pred_scores.permute(0, 2, 1).contiguous()
-        pred_distri = pred_distri.permute(0, 2, 1).contiguous()
+#         pred_scores = pred_scores.permute(0, 2, 1).contiguous()
+#         pred_distri = pred_distri.permute(0, 2, 1).contiguous()
 
-        dtype = pred_scores.dtype
-        batch_size = pred_scores.shape[0]
-        imgsz = torch.tensor(feats[0].shape[2:], device=self.device, dtype=dtype) * self.stride[0]  # image size (h,w)
-        anchor_points, stride_tensor = make_anchors(feats, self.stride, 0.5)
+#         dtype = pred_scores.dtype
+#         batch_size = pred_scores.shape[0]
+#         imgsz = torch.tensor(feats[0].shape[2:], device=self.device, dtype=dtype) * self.stride[0]  # image size (h,w)
+#         anchor_points, stride_tensor = make_anchors(feats, self.stride, 0.5)
 
-        # Targets
-        targets = torch.cat((batch["batch_idx"].view(-1, 1), batch["cls"].view(-1, 1), batch["bboxes"]), 1)
-        targets = self.preprocess(targets.to(self.device), batch_size, scale_tensor=imgsz[[1, 0, 1, 0]])
-        gt_labels, gt_bboxes = targets.split((1, 4), 2)  # cls, xyxy
-        mask_gt = gt_bboxes.sum(2, keepdim=True).gt_(0.0)
+#         # Targets
+#         targets = torch.cat((batch["batch_idx"].view(-1, 1), batch["cls"].view(-1, 1), batch["bboxes"]), 1)
+#         targets = self.preprocess(targets.to(self.device), batch_size, scale_tensor=imgsz[[1, 0, 1, 0]])
+#         gt_labels, gt_bboxes = targets.split((1, 4), 2)  # cls, xyxy
+#         mask_gt = gt_bboxes.sum(2, keepdim=True).gt_(0.0)
 
-        # Pboxes
-        pred_bboxes = self.bbox_decode(anchor_points, pred_distri)  # xyxy, (b, h*w, 4)
-        # dfl_conf = pred_distri.view(batch_size, -1, 4, self.reg_max).detach().softmax(-1)
-        # dfl_conf = (dfl_conf.amax(-1).mean(-1) + dfl_conf.amax(-1).amin(-1)) / 2
+#         # Pboxes
+#         pred_bboxes = self.bbox_decode(anchor_points, pred_distri)  # xyxy, (b, h*w, 4)
+#         # dfl_conf = pred_distri.view(batch_size, -1, 4, self.reg_max).detach().softmax(-1)
+#         # dfl_conf = (dfl_conf.amax(-1).mean(-1) + dfl_conf.amax(-1).amin(-1)) / 2
 
-        target_labels, target_bboxes, target_scores, fg_mask, _ = self.assigner(
-            # pred_scores.detach().sigmoid() * 0.8 + dfl_conf.unsqueeze(-1) * 0.2,
-            pred_scores.detach().sigmoid(),
-            (pred_bboxes.detach() * stride_tensor).type(gt_bboxes.dtype),
-            anchor_points * stride_tensor,
-            gt_labels,
-            gt_bboxes,
-            mask_gt,
-        )
+#         target_labels, target_bboxes, target_scores, fg_mask, _ = self.assigner(
+#             # pred_scores.detach().sigmoid() * 0.8 + dfl_conf.unsqueeze(-1) * 0.2,
+#             pred_scores.detach().sigmoid(),
+#             (pred_bboxes.detach() * stride_tensor).type(gt_bboxes.dtype),
+#             anchor_points * stride_tensor,
+#             gt_labels,
+#             gt_bboxes,
+#             mask_gt,
+#         )
 
-        bs, nq = pred_scores.shape[:2]
+#         bs, nq = pred_scores.shape[:2]
        
-        print(bs,nq);#16,8400
-        print(target_labels);
-        one_hot = torch.zeros((bs, nq, self.nc + 1), dtype=torch.int64, device=targets.device)
-        one_hot.scatter_(2, target_labels.unsqueeze(-1).long(), 1)
-        one_hot = one_hot[..., :-1]
+#         print(bs,nq);#16,8400
+#         print(target_labels);
+#         one_hot = torch.zeros((bs, nq, self.nc + 1), dtype=torch.int64, device=targets.device)
+#         one_hot.scatter_(2, target_labels.unsqueeze(-1).long(), 1)
+#         one_hot = one_hot[..., :-1]
         
 
-        target_scores_sum = max(target_scores.sum(), 1)
-        print(target_labels)
-        # Define target_labels for loss calculation
-        #target_labels = target_scores.clone()
-        #print("target_labels before:",target_labels.sum())
-        #target_labels[target_labels > 0] = 1.0  # Convert to binary labels
+#         target_scores_sum = max(target_scores.sum(), 1)
+#         print(target_labels)
+#         # Define target_labels for loss calculation
+#         #target_labels = target_scores.clone()
+#         #print("target_labels before:",target_labels.sum())
+#         #target_labels[target_labels > 0] = 1.0  # Convert to binary labels
 
-        #target_labels = target_labels.unsqueeze(-1).expand(-1, -1, self.nc)  # [16, 8400] -> [16, 8400, 81]
-        # if target_scores.shape[-1] != self.nc:
-        #     new_target_scores = torch.zeros(
-        #         (target_scores.shape[0], target_scores.shape[1], self.nc),
-        #         dtype=target_scores.dtype,
-        #         device=target_scores.device,
-        #     )
-        #     new_target_scores[..., :target_scores.shape[-1]] = target_scores
-        #     target_scores = new_target_scores
+#         #target_labels = target_labels.unsqueeze(-1).expand(-1, -1, self.nc)  # [16, 8400] -> [16, 8400, 81]
+#         # if target_scores.shape[-1] != self.nc:
+#         #     new_target_scores = torch.zeros(
+#         #         (target_scores.shape[0], target_scores.shape[1], self.nc),
+#         #         dtype=target_scores.dtype,
+#         #         device=target_scores.device,
+#         #     )
+#         #     new_target_scores[..., :target_scores.shape[-1]] = target_scores
+#         #     target_scores = new_target_scores
         
-        # Create one-hot encoded target_labels
-        # target_labels_onehot = torch.zeros(
-        #     (target_labels.shape[0], target_labels.shape[1], self.nc),
-        #     dtype=torch.int64,
-        #     device=target_labels.device,
-        # )
+#         # Create one-hot encoded target_labels
+#         # target_labels_onehot = torch.zeros(
+#         #     (target_labels.shape[0], target_labels.shape[1], self.nc),
+#         #     dtype=torch.int64,
+#         #     device=target_labels.device,
+#         # )
         
-        # Create indices for scatter
-        batch_idx = torch.arange(target_labels.shape[0], device=target_labels.device).unsqueeze(1).expand(-1, target_labels.shape[1])
-        anchor_idx = torch.arange(target_labels.shape[1], device=target_labels.device).unsqueeze(0).expand(target_labels.shape[0], -1)
+#         # Create indices for scatter
+#         batch_idx = torch.arange(target_labels.shape[0], device=target_labels.device).unsqueeze(1).expand(-1, target_labels.shape[1])
+#         anchor_idx = torch.arange(target_labels.shape[1], device=target_labels.device).unsqueeze(0).expand(target_labels.shape[0], -1)
         
-        # Scatter 1s at the correct positions
-        #target_labels_onehot[batch_idx, anchor_idx, target_labels] = 1
+#         # Scatter 1s at the correct positions
+#         #target_labels_onehot[batch_idx, anchor_idx, target_labels] = 1
         
-        # Calculate number of ground truth objects
-        num_gts = fg_mask.sum()
+#         # Calculate number of ground truth objects
+#         num_gts = fg_mask.sum()
         
-        # Cls loss
-        #loss[1] = self.varifocal_loss(pred_scores, target_scores, one_hot) / num_gts if num_gts > 0 else 0
+#         # Cls loss
+#         #loss[1] = self.varifocal_loss(pred_scores, target_scores, one_hot) / num_gts if num_gts > 0 else 0
         
         
         
@@ -407,73 +407,73 @@ class v8DetectionLoss:
 
        
 
-        #target_labels = torch.zeros_like(pred_scores)  # [batch_size, num_anchors, num_classes]
-        #target_labels.scatter_(2, gt_labels.long(), 1.0)  # Set 1.0 at the positions specified by gt_labels
-        #target_labels = torch.zeros(pred_scores.shape[0], pred_scores.shape[1], self.nc, device=pred_scores.device)
-        #target_labels.scatter_(2, gt_labels.long(), 1.0)  # Set 1.0 at the positions specified by gt_labels
-        # Create one-hot encoded target labels using F.one_hot
-        #target_labels = F.one_hot(gt_labels.squeeze(-1).long(), num_classes=self.nc).float()
+#         #target_labels = torch.zeros_like(pred_scores)  # [batch_size, num_anchors, num_classes]
+#         #target_labels.scatter_(2, gt_labels.long(), 1.0)  # Set 1.0 at the positions specified by gt_labels
+#         #target_labels = torch.zeros(pred_scores.shape[0], pred_scores.shape[1], self.nc, device=pred_scores.device)
+#         #target_labels.scatter_(2, gt_labels.long(), 1.0)  # Set 1.0 at the positions specified by gt_labels
+#         # Create one-hot encoded target labels using F.one_hot
+#         #target_labels = F.one_hot(gt_labels.squeeze(-1).long(), num_classes=self.nc).float()
 
-# Cls loss
-#loss[1] = self.varifocal_loss(pred_scores, target_scores, target_labels) / target_scores_sum  # VFL way
+# # Cls loss
+# #loss[1] = self.varifocal_loss(pred_scores, target_scores, target_labels) / target_scores_sum  # VFL way
 
 
 
-        # print("pred_scores shape:", pred_scores.shape)
-        # print("target_labels shape:", target_labels.shape)
-        # print("target_labels:",target_labels.sum())
-        # print("target_labels non-zero count:", (target_labels > 0).sum())
-        # #print("target_labels sample:", target_labels[0, :5, :5])
-        # # Debugging intermediate values
-        # print("target_scores sum true:", target_scores.sum())
-        # print("target_scores_sum:", target_scores_sum)
-        # print("gt_labels shape:", gt_labels.shape)
-        # #print("gt_labels:", gt_labels)
-        # print("gt_labels unique values:", torch.unique(gt_labels))
-        # #print("target_labels:", target_labels)
-        # #print("mask_gt:", mask_gt)
-        # print("mask_gt.sum():", mask_gt.sum())
-        # #print("gt_bboxes:", gt_bboxes)
-        # #print("target_bboxes:", target_bboxes)
-        # #print("target_scores:", target_scores)
-        # #print("mask_gt:", mask_gt)
-        # print("fg_mask:", fg_mask)
-        # print("target_scores_sum:", target_scores_sum)
+#         # print("pred_scores shape:", pred_scores.shape)
+#         # print("target_labels shape:", target_labels.shape)
+#         # print("target_labels:",target_labels.sum())
+#         # print("target_labels non-zero count:", (target_labels > 0).sum())
+#         # #print("target_labels sample:", target_labels[0, :5, :5])
+#         # # Debugging intermediate values
+#         # print("target_scores sum true:", target_scores.sum())
+#         # print("target_scores_sum:", target_scores_sum)
+#         # print("gt_labels shape:", gt_labels.shape)
+#         # #print("gt_labels:", gt_labels)
+#         # print("gt_labels unique values:", torch.unique(gt_labels))
+#         # #print("target_labels:", target_labels)
+#         # #print("mask_gt:", mask_gt)
+#         # print("mask_gt.sum():", mask_gt.sum())
+#         # #print("gt_bboxes:", gt_bboxes)
+#         # #print("target_bboxes:", target_bboxes)
+#         # #print("target_scores:", target_scores)
+#         # #print("mask_gt:", mask_gt)
+#         # print("fg_mask:", fg_mask)
+#         # print("target_scores_sum:", target_scores_sum)
    
 
 
 
-        # Cls loss
-        #loss[1] = self.varifocal_loss(pred_scores, target_scores, target_labels) / target_scores_sum  # VFL way
-        #loss[1] = self.bce(pred_scores, target_scores.to(dtype)).sum() / target_scores_sum  # BCE
+#         # Cls loss
+#         #loss[1] = self.varifocal_loss(pred_scores, target_scores, target_labels) / target_scores_sum  # VFL way
+#         #loss[1] = self.bce(pred_scores, target_scores.to(dtype)).sum() / target_scores_sum  # BCE
         
-        # Debug prints for initial loss
-        # print("\nInitial Loss Debug:")
-        # print("pred_scores mean/std:", pred_scores.mean(), pred_scores.std())
-        # print("target_scores mean/std:", target_scores.mean(), target_scores.std())
-        # print("target_labels mean/std:", target_labels.mean(), target_labels.std())
+#         # Debug prints for initial loss
+#         # print("\nInitial Loss Debug:")
+#         # print("pred_scores mean/std:", pred_scores.mean(), pred_scores.std())
+#         # print("target_scores mean/std:", target_scores.mean(), target_scores.std())
+#         # print("target_labels mean/std:", target_labels.mean(), target_labels.std())
         
-        # # Calculate raw loss components
-        raw_loss = self.varifocal_loss(pred_scores, target_scores, target_labels)
-        print("Raw varifocal loss:", raw_loss)
-        print("Normalized loss:", raw_loss / target_scores_sum)
-        print("Final cls loss:", loss[1])
-        print("Loss after cls weight:", loss[1] * self.hyp.cls)
+#         # # Calculate raw loss components
+#         raw_loss = self.varifocal_loss(pred_scores, target_scores, target_labels)
+#         print("Raw varifocal loss:", raw_loss)
+#         print("Normalized loss:", raw_loss / target_scores_sum)
+#         print("Final cls loss:", loss[1])
+#         print("Loss after cls weight:", loss[1] * self.hyp.cls)
 
-        # Bbox loss
-        if fg_mask.sum():
-            target_bboxes /= stride_tensor
-            loss[0], loss[2] = self.bbox_loss(
-                pred_distri, pred_bboxes, anchor_points, target_bboxes, target_scores, target_scores_sum, fg_mask
-            )
+#         # Bbox loss
+#         if fg_mask.sum():
+#             target_bboxes /= stride_tensor
+#             loss[0], loss[2] = self.bbox_loss(
+#                 pred_distri, pred_bboxes, anchor_points, target_bboxes, target_scores, target_scores_sum, fg_mask
+#             )
 
-        loss[0] *= self.hyp.box  # box gain
-        loss[1] *= self.hyp.cls  # cls gain
-        loss[2] *= self.hyp.dfl  # dfl gain
+#         loss[0] *= self.hyp.box  # box gain
+#         loss[1] *= self.hyp.cls  # cls gain
+#         loss[2] *= self.hyp.dfl  # dfl gain
 
-        print("Total Loss:", loss.sum())
-        print("Total Loss * batch_size:", loss.sum() * batch_size)
-        return loss.sum() * batch_size, loss.detach()  # loss(box, cls, dfl)
+#         print("Total Loss:", loss.sum())
+#         print("Total Loss * batch_size:", loss.sum() * batch_size)
+#         return loss.sum() * batch_size, loss.detach()  # loss(box, cls, dfl)
 
 
 class v8SegmentationLoss(v8DetectionLoss):
