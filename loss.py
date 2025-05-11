@@ -25,7 +25,7 @@ class VarifocalLoss(nn.Module):
         super().__init__()
 
     @staticmethod
-    def forward(pred_score, gt_score, label, alpha=0.95, gamma=1.0):
+    def forward(pred_score, gt_score, label, alpha=0.75, gamma=2.0):
         #print ( "#########Computes VarifocalLoss loss for AML Project ##########")
         #print("GT_Score x label:",((gt_score * label)>0).sum())
 
