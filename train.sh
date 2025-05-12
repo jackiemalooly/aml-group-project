@@ -5,5 +5,5 @@ python3 main.py \
 --imgsz 640 \
 --batch 32 \
 --dataset_location datasets \
---hyp hyp.scratch-high.yaml \
+--hyp hyp.aml.baseline.yaml \
 
