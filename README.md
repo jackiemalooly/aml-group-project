@@ -18,6 +18,11 @@ project_name
 ├── main.py
 ├── requirements.txt
 ├── train.sh
+├── val.sh
+├── train.sh
+├── loss.py
+├── custom_detection_loss.py
+├── augment_aml.py
 └── utils.py
 ```
 
@@ -201,10 +206,10 @@ Alternatively, run the main.py file directly with a saved custom model.
 
 1. Confirm the model path for the trained YOLO model. This should be in `runs\detect\train`
 2. Confirm path to dataset for validation.
-3. Adjust arguments in `valid.sh`
+3. Adjust arguments in `val.sh`
 4. Run
         ```
-        !/bin/bash valid.sh
+        !/bin/bash val.sh
         ```
 
 ## Inference
@@ -233,10 +238,10 @@ for result in results:
 
 1. Confirm the model path for the trained YOLO model. This should be in `runs\detect\train`
 2. Confirm path to image on which to run inference.
-3. Adjust arguments in `predict.sh`
+3. Adjust arguments in `test.sh`
 4. Run
         ```
-        !/bin/bash predict.sh
+        !/bin/bash test.sh
         ```
 
 ## Training RT-DETR
