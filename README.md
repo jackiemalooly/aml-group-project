@@ -81,7 +81,7 @@ def get_augmentation_pipeline():
 We have reused the Varifocal class in the YOLO implementation and replaced the  default Binary cross-entropy loss. We have also modified the original Varifocal loss class for better numerical stability. We are summing the entire BCE result instead of calculating the mean first and then sum. We have also scalled the function with the sum of target scores after the loss calculations. All the implementation has been tested in an online intrerprter to build the function using outputs from the model. A snapshot of the smae will in the apendix section.
 
 To run the custom loss function, you can directly replace the loss.py with the original loss.py, but we also created a custom class to make it easy for users to control the implementation using the main.py file.
-'''
+```
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -132,9 +132,10 @@ loss = varifocal(pred,gt_score ,label)
 #loss = bce(pred,gt_score.to(dtype)).sum()/target_scores_sum  # BCE
 print("Loss:",loss)
 
-'''
+```
 ### Changes in main.py for Varifocal loss
 
+```
 From ultralytics.utils.custom_detection_loss import CustomDetectionLoss 
 
 
@@ -151,11 +152,11 @@ def train(model=str, dataset_path=None, epochs=10, imgsz=640, hyp=None):
     print(f"Current criterion type: {type(model.model.criterion).__name__}")
     #assert isinstance(model.model.criterion, CustomDetectionLoss), "Custom loss not properly set!"
     print("Custom loss function successfully integrated!")
-'''
+```
 
 ## Training
 
-For training a model there are a few options depending on where you have GPU access:
+For training a model, there are a few options depending on where you have GPU access:
 
 ### Colab Workflow
 
