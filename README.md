@@ -81,6 +81,60 @@ def get_augmentation_pipeline():
 We have reused the Varifocal class in the YOLO implementation and replaced the  default Binary cross-entropy loss. We have also modified the original Varifocal loss class for better numerical stability. We are summing the entire BCE result instead of calculating the mean first and then sum. We have also scalled the function with the sum of target scores after the loss calculations. All the implementation has been tested in an online intrerprter to build the function using outputs from the model. A snapshot of the smae will in the apendix section.
 
 To run the custom loss function, you can directly replace the loss.py with the original loss.py, but we also created a custom class to make it easy for users to control the implementation using the main.py file.
+'''
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+def varifocal(pred_score, gt_score, label, alpha=1.0, gamma=2.0):
+    weight = (alpha * pred_score.sigmoid().pow(gamma) * (1 - label) + gt_score * label)
+
+    loss = (
+        F.binary_cross_entropy_with_logits(pred_score.float(), gt_score.float(), reduction="none") * weight
+    ).sum()
+
+    return loss
+                            
+pred = torch.tensor([
+    [-12.0588, -11.5061, -11.7534, -11.4176, -11.5307],
+    [-11.7878, -11.3635, -11.9563, -11.1273, -11.3656],
+    [-11.5275, -11.4884, -11.5407, -11.4327, -11.3850],
+    [-11.4902, -11.5495, -11.5960, -11.7033, -11.5917],
+    [-11.6447, -11.5400, -12.0725, -11.8199, -11.5589]
+])
+        
+label = torch.tensor([
+    [0, 1, 0, 0, 0],
+    [0, 1, 0, 0, 0],
+    [0, 1, 0, 0, 0],
+    [0, 1, 0, 0, 0],
+    [0, 1, 0, 0, 0]
+])
+
+gt_score = torch.tensor([
+    [0.3243, 0.3354, 0.1903, 0.1454, 0.0575],
+    [0.0378, 0.0497, 0.0415, 0.2735, 0.3274],
+    [0.5033, 0.3340, 0.1531, 0.8357, 0.7885],
+    [0.8577, 0.2637, 0.1733, 0.2391, 0.4647],
+    [0.2409, 0.4048, 0.2963, 0.1799, 0.1501]
+])
+
+#target_labels_one=torch.zeros(label.shape[0],label.shape[1],5) (1 hot encoding)
+#print(target_labels_one)
+#torch.unsqueeze(target_labels_one,1)
+#print(target_labels_one)
+#target_labels_one.scatter_(2, tlabel.unsqueeze(-1).long(), 1) (match shape of the target label)
+#print(target_labels_one)
+target_scores_sum = max(target_scores.sum(), 1)
+bce = nn.BCEWithLogitsLoss(reduction="none")
+dtype = pred.dtype
+loss = varifocal(pred,gt_score ,label)
+#loss = bce(pred,gt_score.to(dtype)).sum()/target_scores_sum  # BCE
+print("Loss:",loss)
+
+'''
+
+
 
 ## Training
 
