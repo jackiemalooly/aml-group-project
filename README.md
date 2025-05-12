@@ -142,7 +142,24 @@ for result in results:
 
 ## Training RT-DETR
 
-Training RT-DETR requires a slightly different workflow. `main.py` is not set up to run RT-DETR, so training, validation and inference should be completed in a jupyter or colab notebook. 
+Training RT-DETR requires a slightly different workflow. `main.py` is not set up to run RT-DETR, so training, validation and inference should be completed in the notebook at this path `notebooks\RT-DETR_baseline.ipynb`.
+
+```
+from ultralytics import RTDETR
+
+# Load a pretrained YOLO8l model
+model = RTDETR("rtdetr-l.pt")
+
+train_results = model.train(
+    data="/content/ultralytics/datasets/data.yaml",
+    task='detect', # Explicitly name task for the model.
+    epochs=60,  # Number of training epochs
+    imgsz=640,  # Image size for training
+    warmup_epochs=0,  # Number of warmup epochs,
+    project="aml_group_project",  # Directory to save training results
+    name="rt-detr baseline",  # Name of the experiment
+)
+```
 
 ## Citations
 
