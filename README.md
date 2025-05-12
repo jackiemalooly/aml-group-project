@@ -81,6 +81,8 @@ def get_augmentation_pipeline():
 We have reused the Varifocal class in the YOLO implementation and replaced the  default Binary cross-entropy loss. We have also modified the original Varifocal loss class for better numerical stability. We are summing the entire BCE result instead of calculating the mean first and then sum. We have also scalled the function with the sum of target scores after the loss calculations. All the implementation has been tested in an online intrerprter to build the function using outputs from the model. A snapshot of the smae will in the apendix section.
 
 To run the custom loss function, you can directly replace the loss.py with the original loss.py, but we also created a custom class to make it easy for users to control the implementation using the main.py file.
+
+### Logic implemented in Varifocal loss
 ```
 import torch
 import torch.nn as nn
@@ -119,11 +121,11 @@ gt_score = torch.tensor([
     [0.2409, 0.4048, 0.2963, 0.1799, 0.1501]
 ])
 
-#target_labels_one=torch.zeros(label.shape[0],label.shape[1],5) (1 hot encoding)
-#print(target_labels_one)
+target_labels_one=torch.zeros(label.shape[0],label.shape[1],5) ------------>(1 hot encoding)
+print(target_labels_one)
 #torch.unsqueeze(target_labels_one,1)
 #print(target_labels_one)
-#target_labels_one.scatter_(2, tlabel.unsqueeze(-1).long(), 1) (match shape of the target label)
+target_labels_one.scatter_(2, label.unsqueeze(-1).long(), 1) ----------> (match shape of the target label)
 #print(target_labels_one)
 target_scores_sum = max(target_scores.sum(), 1)
 bce = nn.BCEWithLogitsLoss(reduction="none")
