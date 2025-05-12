@@ -58,7 +58,7 @@ The following preprocessing steps may be applied using `dataset_processing.ipynb
 ![alt text](image.png)
 ## Data Augmentation using Albumentations (augment_aml.py)
 We used Albumentations(https://albumentations.ai/) to perform various augmentations. The following are the default settings. We implemented a logic to augment the underrepresented class to approximately match the highest represented class. In our experiment, the max count was around 600 and therefore we tried to match other classes with the augmentation. The code balances the underrepresented class but it scales the total dataset by lot. Therefore for the current implementation, we have hardcoded using the parameter max count in the code (augment_aml.py)
-
+```
 def get_augmentation_pipeline():
     return A.Compose([
         A.RandomSizedBBoxSafeCrop(height=640, width=640, erosion_rate=0.2, p=0.3),
@@ -75,7 +75,7 @@ def get_augmentation_pipeline():
         min_visibility=0.1,
         clip=True
     ))
-
+```
 ## Custom loss function using Varifocal Loss
 
 We have reused the Varifocal class in the YOLO implementation and replaced the  default Binary cross-entropy loss. We have also modified the original Varifocal loss class for better numerical stability. We are summing the entire BCE result instead of calculating the mean first and then sum. We have also scalled the function with the sum of target scores after the loss calculations. All the implementation has been tested in an online intrerprter to build the function using outputs from the model. A snapshot of the smae will in the apendix section.
