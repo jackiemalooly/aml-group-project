@@ -56,6 +56,31 @@ The following preprocessing steps may be applied using `dataset_processing.ipynb
 •	Select 50% of the dataset for the experiments (although the pipeline supports any user-defined split ratio). Using `train_test_split()` from scikit-learn with the stratify parameter, class distribution was preserved after the split. This process results in a training set containing around 6,000 images, each resized to 640×640.
 
 ![alt text](image.png)
+## Data Augmentation using Albumentations (augment_aml.py)
+We used Albumentations(https://albumentations.ai/) to perform various augmentations. The following are the default settings. We implemented a logic to augment the underrepresented class to approximately match the highest represented class. In our experiment, the max count was around 600 and therefore we tried to match other classes with the augmentation. The code balances the underrepresented class but it scales the total dataset by lot. Therefore for the current implementation, we have hardcoded using the parameter max count in the code (augment_aml.py)
+
+def get_augmentation_pipeline():
+    return A.Compose([
+        A.RandomSizedBBoxSafeCrop(height=640, width=640, erosion_rate=0.2, p=0.3),
+        A.HorizontalFlip(p=0.5),
+        A.VerticalFlip(p=0.2),
+        A.RandomBrightnessContrast(p=0.4),
+        A.Rotate(limit=15, p=0.3),
+        A.Blur(blur_limit=3, p=0.2),
+        A.ToGray(p=0.1),
+        A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=10, p=0.5),
+    ], bbox_params=A.BboxParams(
+        format='yolo',  
+        label_fields=['class_labels'],
+        min_visibility=0.1,
+        clip=True
+    ))
+
+## Custom loss function using Varifocal Loss
+
+We have reused the Varifocal class in the YOLO implementation and replaced the  default Binary cross-entropy loss. We have also modified the original Varifocal loss class for better numerical stability. We are summing the entire BCE result instead of calculating the mean first and then sum. We have also scalled the function with the sum of target scores after the loss calculations. All the implementation has been tested in an online intrerprter to build the function using outputs from the model. A snapshot of the smae will in the apendix section.
+
+To run the custom loss function, you can directly replace the loss.py with the original loss.py, but we also created a custom class to make it easy for users to control the implementation using the main.py file.
 
 ## Training
 
