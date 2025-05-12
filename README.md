@@ -133,8 +133,25 @@ loss = varifocal(pred,gt_score ,label)
 print("Loss:",loss)
 
 '''
+### Changes in main.py for Varifocal loss
+
+From ultralytics.utils.custom_detection_loss import CustomDetectionLoss 
 
 
+def train(model=str, dataset_path=None, epochs=10, imgsz=640, hyp=None):
+    data_yaml_files = glob.glob(os.path.join(dataset_path, '*.yaml'))
+    if not data_yaml_files:
+      raise FileNotFoundError(f"No YAML files found in {dataset_path}")
+    yaml_file_path = data_yaml_files[0]
+    print(hyp)
+    print(f"Using YAML file: {yaml_file_path}")
+    #custom_loss = CustomDetectionLoss(model.model) -----> uncomment for Varifocal loss
+    #model.model.criterion = custom_loss -----> uncomment for Varifocal loss
+    print("\nVerifying loss function:")
+    print(f"Current criterion type: {type(model.model.criterion).__name__}")
+    #assert isinstance(model.model.criterion, CustomDetectionLoss), "Custom loss not properly set!"
+    print("Custom loss function successfully integrated!")
+'''
 
 ## Training
 
