@@ -24,7 +24,7 @@ if not os.path.exists("./logs/"):
 log = Logger()
 #log.open("logs/logfile.txt") # Not storing any logs for now. We'll likely just use comet_ml for logging.
 
-# Initialize comet_ml
+# Uncomment to initialize comet_ml within the script
 #COMET_ML_API_KEY = os.getenv("COMET_ML_API_KEY")
 #if COMET_ML_API_KEY is None:
 #    raise ValueError("COMET_ML_API_KEY is not set.")
