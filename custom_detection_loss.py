@@ -4,15 +4,15 @@ import torch.nn.functional as F
 from ultralytics.utils.ops import xywh2xyxy
 from ultralytics.utils.tal import make_anchors, dist2bbox
 from ultralytics.utils.tal import TaskAlignedAssigner
-from ultralytics.utils.loss import v8DetectionLoss, FocalLoss
+from ultralytics.utils.loss import v8DetectionLoss, FocalLoss, VarifocalLoss
 
 class CustomDetectionLoss(v8DetectionLoss):
     def __init__(self, model):
         super().__init__(model)
-        self.custom_identifier = "CUSTOM_FOCAL_LOSS_v1"
+        self.custom_identifier = "CUSTOM_VarifocalLoss_LOSS_v1"
         print(f"\n=== {self.custom_identifier} Initialized ===")
-        print("Using Focal Loss for classification")
-        self.focal_loss = FocalLoss()
+        print("Using VarifocalLoss for classification")
+        self.VarifocalLoss = VarifocalLoss()
         
     def preprocess(self, targets, batch_size, scale_tensor):
         """Preprocesses the target counts and matches with the input batch size to output a tensor."""
@@ -79,7 +79,7 @@ class CustomDetectionLoss(v8DetectionLoss):
         
         target_scores_sum = max(target_scores.sum(), 1)
         
-        # # Create one-hot encoded target labels for focal loss
+        # # Create one-hot encoded target labels for VarifocalLoss loss
         target_labels_onehot = torch.zeros(
              (target_labels.shape[0], target_labels.shape[1], self.nc),
              dtype=torch.int64,
@@ -91,11 +91,11 @@ class CustomDetectionLoss(v8DetectionLoss):
         num_gts = fg_mask.sum()
         target_scores_sum = max(target_scores.sum(), 1)
         
-        # Cls loss using focal loss
+        # Cls loss using VarifocalLoss loss
       
-        loss[1] = self.focal_loss(pred_scores, target_labels_onehot.float())
+        loss[1] = self.VarifocalLoss(pred_scores, target_labels_onehot.float())
         loss[1] /= num_gts
-        print("raw focal loss:",loss[1])
+        #print("raw VarifocalLoss :",loss[1])
         #loss[1] /= target_scores_sum  # Normalize by number of ground truth objects
         
             
