@@ -188,6 +188,10 @@ For training a model, there are a few options depending on where you have GPU ac
         ```shell
         python3 main.py --model_mode train --model_name yolov8l.pt --epochs 60 --imgsz 640 --dataset_location datasets --hyp hyp.aml.baseline.yaml --freeze [16,17,18,19,20,21, 22]
         ```
+        For testing/validating a model
+        ```shell
+        python3 main.py --model_mode test --model_name runs/detect/freeze_head_baseline/weights/best.pt
+        ```
 
     * If you want to use Colab GPUs and modify the ultralytics code before attempting a training run. For instance, if you want to implement the custom VariFocal Loss. Then you will need to use the notebook located at `notebooks\colab_workflow_yolov8_ultralytics.ipynb`. 
         This notebook will clone the ultralytics/ultralytics repository allowing you to make changes to underlying code. 

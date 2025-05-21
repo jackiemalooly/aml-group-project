@@ -30,10 +30,10 @@ log = Logger()
 COMET_ML_API_KEY = os.getenv("COMET_ML_API_KEY")
 if COMET_ML_API_KEY is None:
     raise ValueError("COMET_ML_API_KEY is not set.")
-comet_ml.login(project_name="aml-group-project", api_key="COMET_ML_API_KEY")
-comet_ml.start(api_key="COMET_ML_API_KEY", project_name="aml-group-project", experiment_key="baseline_args_freeze_head")
+comet_ml.login(project_name="aml-group-project", api_key=COMET_ML_API_KEY)
+comet_ml.start(api_key=COMET_ML_API_KEY, project_name="aml-group-project")
 
-model = YOLO(args.model_name, 'detect')
+model = YOLO(args.model_name)
 
 
 def train(model=str, dataset_path=None, epochs=10, imgsz=640, freeze=None, hyp=None):
@@ -75,25 +75,15 @@ def train(model=str, dataset_path=None, epochs=10, imgsz=640, freeze=None, hyp=N
     return results
 
     
-## TODO: refine test function
-# def val(model=str, dataset_path=None, epochs=10, imgsz=640,batch=16,conf=0.25,iou=0.6):
-#     data_yaml_files = glob.glob(os.path.join(dataset_path, '*.yaml'))
-#       if not data_yaml_files:
-#         raise FileNotFoundError(f"No YAML files found in {dataset_path}")
-#       yaml_file_path = data_yaml_files[0]
-#       print(f"Using YAML file: {yaml_file_path}")
-#     ##helper function to build and load --hyp yaml
-#      metrics = model.val(
-#        data=yaml_file_path, # Path to dataset config file
-#        epochs=epochs, # Number of training epochs
-#        imgsz=imgsz,
-#        batch=batch,
-#        conf=conf,#Sets the minimum confidence threshold for detections. Lower values increase recall but may introduce more false positives. Used during validation to compute precision-recall curves.
-#        iou=batch)#Sets the Intersection Over Union threshold for Non-Maximum Suppression. Controls duplicate detection elimination. 
-# #       # Also takes a device argument if needed, e.g. device="cpu"
-#     log.write(f"Results: {metrics}")
-#      return metrics 
-
+def validate(model=str):
+    #data_yaml_files = glob.glob(os.path.join(dataset_path, '*.yaml'))
+    #if not data_yaml_files:
+    #    raise FileNotFoundError(f"No YAML files found in {dataset_path}")
+    #yaml_file_path = data_yaml_files[0]
+    #print(f"Using YAML file: {yaml_file_path}")
+    metrics = model.val()
+    log.write(f"Results: {metrics}")
+    return metrics 
 # def predict(model=str, dataset_path=None,imgsz=320,conf=0.5,save=True):
 #     data_yaml_files = glob.glob(os.path.join(dataset_path, '*.yaml'))
 #       if not data_yaml_files:
@@ -115,8 +105,8 @@ def main():
     # Main function to handle training or testing
     if args.model_mode == "train":
         train(model=model, dataset_path=args.dataset_location, epochs=args.epochs, imgsz=args.imgsz, freeze=args.freeze, hyp=args.hyp)
-    #elif args.model_mode == "test":
-    #    test(args.model_name, args.dataset_location)
+    elif args.model_mode == "test":
+        validate(args.model_name)
     else:
         raise ValueError("Model mode must be either train or test.")
     
