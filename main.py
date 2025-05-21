@@ -7,6 +7,8 @@ import os
 import requests
 import glob
 #from ultralytics.utils.custom_detection_loss import CustomDetectionLoss 
+from dotenv import load_dotenv
+load_dotenv()
 
 from utils import (
 AverageMeter, 
@@ -28,7 +30,8 @@ log = Logger()
 COMET_ML_API_KEY = os.getenv("COMET_ML_API_KEY")
 if COMET_ML_API_KEY is None:
     raise ValueError("COMET_ML_API_KEY is not set.")
-comet_ml.init(project_name="aml-group-project", api_key="COMET_ML_API_KEY")
+comet_ml.login(project_name="aml-group-project", api_key="COMET_ML_API_KEY")
+comet_ml.start(api_key="COMET_ML_API_KEY", project_name="aml-group-project", experiment_key="baseline_args_freeze_head")
 
 model = YOLO(args.model_name, 'detect')
 
@@ -55,7 +58,7 @@ def train(model=str, dataset_path=None, epochs=10, imgsz=640, freeze=None, hyp=N
 
         'imgsz': imgsz,  # Image size for training
 
-        'freeze': freeze, # Layers to freeze for training        
+        'freeze': [16,17,18,19,20,21,22], # Layers to freeze for training        
 
     }    
 
@@ -116,6 +119,8 @@ def main():
     #    test(args.model_name, args.dataset_location)
     else:
         raise ValueError("Model mode must be either train or test.")
+    
+    comet_ml.end()
 
 if __name__ == "__main__":
     main()
