@@ -177,11 +177,16 @@ For training a model, there are a few options depending on where you have GPU ac
     * To use a Colab or Jupyter Notebook to run the aml-group-project `main.py` file.
         Run the notebook located at path `notebooks\colab_workflow_yolov8_ultralytics.ipynb`
 
-    * To run `main.py` directly
+    * To run `main.py` using train.sh in a jupyter notebook
         - Adjust arguments in `train.sh`
         - Run 
         ```
         !/bin/bash train.sh
+        ```
+    
+    * To run `main.py` using CLI    command
+        ```shell
+        python3 main.py --model_mode train --model_name yolov8l.pt --epochs 60 --imgsz 640 --dataset_location datasets --hyp hyp.aml.baseline.yaml --freeze [16,17,18,19,20,21, 22]
         ```
 
     * If you want to use Colab GPUs and modify the ultralytics code before attempting a training run. For instance, if you want to implement the custom VariFocal Loss. Then you will need to use the notebook located at `notebooks\colab_workflow_yolov8_ultralytics.ipynb`. 

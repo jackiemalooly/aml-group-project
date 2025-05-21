@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "code"
 version = "0.1.0"
-description = "project code goes here."
-authors = ["frankcholula <lu.phrank@gmail.com>"]
+description = "Repository for training and testing new architectures for object detection of military aircraft."
+authors = 
 license = "GPL-3.0-or-later"
 readme = "README.md"
 package-mode = false
@@ -22,7 +22,7 @@ torch = "^2.6.0"
 torchvision = "^0.21.0"
 torchsummary = "^1.5.1"
 tqdm = "^4.67.1"
-ultralytics = "^8.3.91"
+ultralytics = "8.3.40"
 comet-ml = "^3.49.5"
 supervision = "^0.25.1"
 roboflow = "^1.1.58"
